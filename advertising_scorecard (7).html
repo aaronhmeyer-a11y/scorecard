@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advertising Scorecard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F5F3EE;
+    --surface: #FFFFFF;
+    --border: #E0DDD6;
+    --border-strong: #C8C4BB;
+    --text: #1A1916;
+    --text-muted: #7A776E;
+    --text-hint: #ABA89F;
+    --accent: #2A5C8F;
+    --accent-light: #EAF1F8;
+    --green: #1D6B4E;
+    --green-light: #E6F4EE;
+    --amber: #8A5C10;
+    --amber-light: #FDF3E0;
+    --red: #8A2020;
+    --red-light: #FBEAEA;
+    --yes-bg: #E6F4EE;
+    --yes-text: #1D6B4E;
+    --yes-border: #9ECFBA;
+    --no-bg: #FBEAEA;
+    --no-text: #8A2020;
+    --no-border: #E8A8A8;
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+  }
+
+  .page-wrap {
+    width: 100%;
+    max-width: 640px;
+  }
+
+  .page-header {
+    margin-bottom: 24px;
+  }
+
+  .page-header h1 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    color: var(--text);
+  }
+
+  .page-header p {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .instructions {
+    background: var(--accent-light);
+    border: 0.5px solid #B5CCE4;
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--accent);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .card-header {
+    padding: 14px 20px;
+    border-bottom: 0.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-header-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: var(--bg);
+    border: 0.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  .card-header h2 {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-muted);
+  }
+
+  .card-body { padding: 4px 0; }
+
+  .field-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 11px 20px;
+    gap: 12px;
+    border-bottom: 0.5px solid var(--border);
+    transition: background 0.1s;
+  }
+
+  .field-row:last-child { border-bottom: none; }
+  .field-row:hover { background: #FAFAF8; }
+
+  .field-label {
+    font-size: 14px;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .toggle-group { display: flex; gap: 4px; }
+
+  .toggle-btn {
+    padding: 5px 16px;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    border: 0.5px solid var(--border-strong);
+    border-radius: 20px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-muted);
+    transition: all 0.12s;
+  }
+
+  .toggle-btn:hover { background: var(--bg); border-color: var(--border-strong); }
+
+  .toggle-btn.active-yes {
+    background: var(--yes-bg);
+    color: var(--yes-text);
+    border-color: var(--yes-border);
+  }
+
+  .toggle-btn.active-no {
+    background: var(--no-bg);
+    color: var(--no-text);
+    border-color: var(--no-border);
+  }
+
+  .reviews-input, .text-input, .dealer-select {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius);
+    padding: 6px 10px;
+    background: var(--bg);
+    color: var(--text);
+    transition: border-color 0.15s, box-shadow 0.15s;
+    outline: none;
+  }
+
+  .reviews-input { width: 80px; text-align: center; }
+  .text-input { width: 180px; }
+
+  .reviews-input:focus, .text-input:focus, .dealer-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(42,92,143,0.08);
+  }
+
+  .score-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .score-top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .score-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); }
+  .score-number { font-family: 'DM Mono', monospace; font-size: 36px; font-weight: 500; line-height: 1; color: var(--text); transition: color 0.3s; }
+  .score-out-of { font-size: 14px; color: var(--text-hint); margin-left: 4px; }
+  .score-status { font-size: 13px; font-weight: 500; color: var(--text-muted); text-align: right; }
+
+  .score-bar-bg {
+    width: 100%;
+    height: 6px;
+    background: var(--bg);
+    border-radius: 3px;
+    overflow: hidden;
+    border: 0.5px solid var(--border);
+  }
+
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.4s cubic-bezier(.4,0,.2,1), background 0.4s;
+    width: 0%;
+  }
+
+  .actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+
+  .btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 9px 22px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    border: 0.5px solid var(--border-strong);
+    background: transparent;
+    color: var(--text);
+    transition: all 0.12s;
+  }
+
+  .btn:hover { background: var(--bg); }
+  .btn:active { transform: scale(0.98); }
+
+  .btn-primary {
+    background: var(--text);
+    color: #FFF;
+    border-color: var(--text);
+  }
+
+  .btn-primary:hover { background: #333; border-color: #333; }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--text);
+    color: #fff;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    padding: 10px 20px;
+    border-radius: 20px;
+    opacity: 0;
+    transition: all 0.3s;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .dealer-row { padding: 12px 20px; border-bottom: 0.5px solid var(--border); }
+
+  @media (max-width: 480px) {
+    .field-label { font-size: 13px; }
+    .toggle-btn { padding: 5px 12px; font-size: 12px; }
+    .text-input { width: 140px; }
+    .score-number { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-wrap">
+
+  <div class="page-header">
+    <h1>Advertising scorecard</h1>
+    <p>Rate a dealer's digital marketing presence across social, search, and website criteria.</p>
+  </div>
+
+  <div class="instructions">
+    For yes/no questions, use the toggle buttons. For Google reviews, enter the number of reviews (not yes or no).
+  </div>
+
+  <!-- Dealer -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-icon">🏢</div>
+      <h2>Dealer</h2>
+    </div>
+    <div class="card-body">
+      <div class="field-row">
+        <span class="field-label">Business Manager</span>
+        <input class="text-input" id="business_manager" type="text" placeholder="Enter name…" />
+      </div>
+      <div class="dealer-row">
+        <input class="text-input" id="dealer-select" type="text" placeholder="Type dealer name…" oninput="calcScore()" style="width:100%" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Social & Search -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-icon">📱</div>
+      <h2>Digital marketing — social &amp; search</h2>
+    </div>
+    <div class="card-body">
+      <div class="field-row">
+        <span class="field-label">Posting on Facebook</span>
+        <div class="toggle-group">
+          <button class="toggle-btn" id="facebook_post-yes" onclick="toggle('facebook_post','yes')">Yes</button>
+          <button class="toggle-btn" id="facebook_post-no" onclick="toggle('facebook_post','no')">No</button>
+        </div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Paid ads on Facebook</span>
+        <div class="toggle-group">
+          <button class="toggle-btn" id="paid_facebook-yes" onclick="toggle('paid_facebook','yes')">Yes</button>
+          <button class="toggle-btn" id="paid_facebook-no" onclick="toggle('paid_facebook','no')">No</button>
+        </div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Posting on TikTok</span>
+        <div class="toggle-group">
+          <button class="toggle-btn" id="tiktok-yes" onclick="toggle('tiktok','yes')">Yes</button>
+          <button class="toggle-btn" id="tiktok-no" onclick="toggle('tiktok','no')">No</button>
+        </div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Posting on Instagram</span>
+        <div class="toggle-group">
+          <button class="toggle-btn" id="instagram-yes" onclick="toggle('instagram','yes')">Yes</button>
+          <button class="toggle-btn" id="instagram-no" onclick="toggle('instagram','no')">No</button>
+        </div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Google Business Page</span>
+        <div class="toggle-group">
+          <button class="toggle-btn" id="google_biz-yes" onclick="toggle('google_biz','yes')">Yes</button>
+          <button class="toggle-btn" id="google_biz-no" onclick="toggle('google_biz','no')">No</button>
+        </div>
+      </div>
+      <div class="field-row">
+        <span class="field-label"># of Google reviews</span>
+        <input class="reviews-input" id="google_reviews" type="number" min="0" placeholder="0" oninput="calcScore()" />
+      </div>
+      <div class="field-row">
+        <span class="field-label">Google Ads</span>
+        <div class="toggle-group">
+          <button class="toggle-btn" id="google_ads-yes" onclick="toggle('google_ads','yes')">Yes</button>
+          <button class="toggle-btn" id="google_ads-no" onclick="toggle('google_ads','no')">No</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Website -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-icon">🌐</div>
+      <h2>Website</h2>
+    </div>
+    <div class="card-body">
+      <div class="field-row">
+        <span class="field-label">Programs displayed on website</span>
+        <div class="toggle-group">
+          <button class="toggle-btn" id="programs-yes" onclick="toggle('programs','yes')">Yes</button>
+          <button class="toggle-btn" id="programs-no" onclick="toggle('programs','no')">No</button>
+        </div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Website company</span>
+        <input class="text-input" id="website_company" type="text" placeholder="e.g. Dealer Spike" oninput="calcScore()" />
+      </div>
+      <div class="field-row">
+        <span class="field-label">Inventory listed</span>
+        <div class="toggle-group">
+          <button class="toggle-btn" id="inventory-yes" onclick="toggle('inventory','yes')">Yes</button>
+          <button class="toggle-btn" id="inventory-no" onclick="toggle('inventory','no')">No</button>
+        </div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Actual photos</span>
+        <div class="toggle-group">
+          <button class="toggle-btn" id="photos-yes" onclick="toggle('photos','yes')">Yes</button>
+          <button class="toggle-btn" id="photos-no" onclick="toggle('photos','no')">No</button>
+        </div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Pricing shown</span>
+        <div class="toggle-group">
+          <button class="toggle-btn" id="pricing-yes" onclick="toggle('pricing','yes')">Yes</button>
+          <button class="toggle-btn" id="pricing-no" onclick="toggle('pricing','no')">No</button>
+        </div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Monthly payments shown</span>
+        <div class="toggle-group">
+          <button class="toggle-btn" id="monthly-yes" onclick="toggle('monthly','yes')">Yes</button>
+          <button class="toggle-btn" id="monthly-no" onclick="toggle('monthly','no')">No</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Score -->
+  <div class="score-card">
+    <div class="score-top">
+      <div>
+        <div class="score-label">Score</div>
+        <div style="display:flex;align-items:baseline;gap:4px;margin-top:4px">
+          <span class="score-number" id="score-number">—</span>
+          <span class="score-out-of" id="score-out-of"></span>
+        </div>
+      </div>
+      <div class="score-status" id="score-status">Fill in the fields above</div>
+    </div>
+    <div class="score-bar-bg">
+      <div class="score-bar-fill" id="score-fill"></div>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="actions">
+    <button class="btn" onclick="resetForm()">Reset</button>
+    <button class="btn" onclick="copyResults()">Copy results</button>
+    <button class="btn" onclick="exportCSV()">Export CSV</button>
+    <button class="btn btn-primary" id="submit-btn" onclick="submitToAll()">Submit &#x2197;</button>
+  </div>
+  <div id="submit-status" style="text-align:right;font-size:12px;color:var(--text-muted);margin-top:8px;min-height:16px;"></div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const fields = ['facebook_post','paid_facebook','tiktok','instagram','google_biz','google_ads','programs','inventory','photos','pricing','monthly'];
+const state = {};
+fields.forEach(f => state[f] = null);
+
+function toggle(field, val) {
+  state[field] = val;
+  fields.forEach(f => {
+    ['yes','no'].forEach(v => {
+      const btn = document.getElementById(f+'-'+v);
+      if (btn) btn.className = 'toggle-btn';
+    });
+    if (state[f]) {
+      const btn = document.getElementById(f+'-'+state[f]);
+      if (btn) btn.className = 'toggle-btn active-'+state[f];
+    }
+  });
+  calcScore();
+}
+
+function calcScore() {
+  let points = 0;
+  let answered = 0;
+  fields.forEach(f => {
+    if (state[f] !== null) answered++;
+    if (state[f] === 'yes') points++;
+  });
+  const reviews = parseInt(document.getElementById('google_reviews').value) || 0;
+  if (reviews > 0) answered++;
+  const reviewScore = reviews >= 200 ? 1 : reviews >= 100 ? 0.5 : reviews >= 50 ? 0.25 : 0;
+
+  const raw = (points + reviewScore) / 12;
+  const total = raw.toFixed(2);
+  const pct = Math.round(raw * 100);
+
+  const numEl = document.getElementById('score-number');
+  const fillEl = document.getElementById('score-fill');
+  const statusEl = document.getElementById('score-status');
+  const outofEl = document.getElementById('score-out-of');
+
+  if (answered === 0) {
+    numEl.textContent = '—'; numEl.style.color = 'var(--text-hint)';
+    fillEl.style.width = '0%'; outofEl.textContent = '';
+    statusEl.textContent = 'Fill in the fields above';
+    return;
+  }
+
+  numEl.textContent = total;
+  outofEl.textContent = '/ 1.00';
+
+  if (pct >= 70) {
+    fillEl.style.background = '#1D9E75';
+    numEl.style.color = 'var(--green)';
+    statusEl.textContent = '✓ Strong presence';
+    statusEl.style.color = 'var(--green)';
+  } else if (pct >= 40) {
+    fillEl.style.background = '#D4960A';
+    numEl.style.color = 'var(--amber)';
+    statusEl.textContent = '~ Room to improve';
+    statusEl.style.color = 'var(--amber)';
+  } else {
+    fillEl.style.background = '#C0392B';
+    numEl.style.color = 'var(--red)';
+    statusEl.textContent = '✗ Needs attention';
+    statusEl.style.color = 'var(--red)';
+  }
+
+  fillEl.style.width = pct + '%';
+}
+
+function resetForm() {
+  fields.forEach(f => { state[f] = null; });
+  fields.forEach(f => ['yes','no'].forEach(v => {
+    const btn = document.getElementById(f+'-'+v);
+    if (btn) btn.className = 'toggle-btn';
+  }));
+  document.getElementById('google_reviews').value = '';
+  document.getElementById('website_company').value = '';
+  document.getElementById('dealer-select').value = '';
+  calcScore();
+  showToast('Form reset');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function getResultsText() {
+  const dealer = document.getElementById('dealer-select').value || '(not selected)';
+  const bm = document.getElementById('business_manager').value || '—';
+  const reviews = document.getElementById('google_reviews').value || '0';
+  const wc = document.getElementById('website_company').value || '—';
+  const labels = {
+    facebook_post: 'Posting on Facebook',
+    paid_facebook: 'Paid ads on Facebook',
+    tiktok: 'Posting on TikTok',
+    instagram: 'Posting on Instagram',
+    google_biz: 'Google Business Page',
+    google_ads: 'Google Ads',
+    programs: 'Programs on website',
+    inventory: 'Inventory listed',
+    photos: 'Actual photos',
+    pricing: 'Pricing shown',
+    monthly: 'Monthly payments shown'
+  };
+  let lines = ['Dealer: ' + dealer, 'Business Manager: ' + bm, ''];
+  fields.forEach(f => lines.push(labels[f] + ': ' + (state[f] || 'unanswered')));
+  lines.push('Google reviews: ' + reviews);
+  lines.push('Website company: ' + wc);
+  const score = document.getElementById('score-number').textContent;
+  lines.push('', 'Score: ' + score);
+  return lines.join('\n');
+}
+
+function copyResults() {
+  navigator.clipboard.writeText(getResultsText()).then(() => showToast('Results copied to clipboard'));
+}
+
+function exportCSV() {
+  const dealer = document.getElementById('dealer-select').value || '';
+  const bm = document.getElementById('business_manager').value || '';
+  const reviews = document.getElementById('google_reviews').value || '0';
+  const wc = document.getElementById('website_company').value || '';
+  const score = document.getElementById('score-number').textContent;
+  const headers = ['Dealer','Business Manager','Facebook Posting','Paid Facebook Ads','TikTok Posting','Instagram Posting','Google Business Page','Google Reviews','Google Ads','Programs on Website','Website Company','Inventory Listed','Actual Photos','Pricing Shown','Monthly Payments','Score'];
+  const row = [
+    dealer,
+    bm,
+    state['facebook_post']||'',
+    state['paid_facebook']||'',
+    state['tiktok']||'',
+    state['instagram']||'',
+    state['google_biz']||'',
+    reviews,
+    state['google_ads']||'',
+    state['programs']||'',
+    wc,
+    state['inventory']||'',
+    state['photos']||'',
+    state['pricing']||'',
+    state['monthly']||'',
+    score
+  ];
+  const csv = [headers, row].map(r => r.map(v => '"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = (dealer||'scorecard').replace(/[^a-z0-9]/gi,'_')+'_scorecard.csv';
+  a.click(); URL.revokeObjectURL(url);
+  showToast('CSV exported');
+}
+
+function getPayload() {
+  const dealer = document.getElementById('dealer-select').value || '';
+  const bm = document.getElementById('business_manager').value || '';
+  const reviews = parseInt(document.getElementById('google_reviews').value) || 0;
+  const wc = document.getElementById('website_company').value || '';
+  const score = parseFloat(document.getElementById('score-number').textContent) || 0;
+  return {
+    "Business Manager": bm,
+    "Dealer": dealer,
+    "Facebook Posting": state['facebook_post'] || '',
+    "Paid Facebook Ads": state['paid_facebook'] || '',
+    "TikTok Posting": state['tiktok'] || '',
+    "Instagram Posting": state['instagram'] || '',
+    "Google Business Page": state['google_biz'] || '',
+    "Google Reviews": reviews,
+    "Google Ads": state['google_ads'] || '',
+    "Programs on Website": state['programs'] || '',
+    "Website Company": wc,
+    "Inventory Listed": state['inventory'] || '',
+    "Actual Photos": state['photos'] || '',
+    "Pricing Shown": state['pricing'] || '',
+    "Monthly Payments": state['monthly'] || '',
+    "Score": score
+  };
+}
+
+async function submitToGoogleSheets(payload) {
+  const url = 'https://script.google.com/macros/s/AKfycbxFs4XIi63_rtHkyAQp59W1kvpuEFDw-JWfPHYvyBSEH8mwuhNGk1V2iYjA3dtOguF9OQ/exec';
+  await fetch(url, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+}
+
+async function submitToAirtable(payload) {
+  // Routed through Google Apps Script to avoid CORS issues
+  const url = 'https://script.google.com/macros/s/AKfycbxFs4XIi63_rtHkyAQp59W1kvpuEFDw-JWfPHYvyBSEH8mwuhNGk1V2iYjA3dtOguF9OQ/exec';
+  await fetch(url + '?dest=airtable', {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+}
+
+async function submitToAll() {
+  const score = document.getElementById('score-number').textContent;
+  if (score === '—') { showToast('Fill in the form before submitting'); return; }
+  const btn = document.getElementById('submit-btn');
+  const status = document.getElementById('submit-status');
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+  status.textContent = '';
+  const payload = getPayload();
+  const results = await Promise.allSettled([
+    submitToGoogleSheets(payload),
+    submitToAirtable(payload)
+  ]);
+  btn.disabled = false;
+  btn.textContent = 'Submit ↗';
+  const sheetsOk = results[0].status === 'fulfilled';
+  const airtableOk = results[1].status === 'fulfilled';
+  if (sheetsOk && airtableOk) {
+    showToast('✓ Submitted to Google Sheets & Airtable');
+    status.style.color = 'var(--green)';
+    status.textContent = 'Submitted successfully to both destinations.';
+  } else {
+    const failed = [];
+    if (!sheetsOk) failed.push('Google Sheets');
+    if (!airtableOk) { failed.push('Airtable'); console.error(results[1].reason); }
+    showToast('Partial submit — check status below');
+    status.style.color = 'var(--red)';
+    status.textContent = 'Failed: ' + failed.join(', ') + '. Check console for details.';
+  }
+}
+</script>
+</body>
+</html>
